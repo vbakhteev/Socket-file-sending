@@ -15,13 +15,13 @@ def main():
     sock.sendall(file.encode())
     sock.recv(2)
     
-    msg_size = 1024*512 # 0.5 Megabyte
-    i = 0
-    while i < len(data):
-        chunk = data[i:max(i+msg_size, len(data))]
-        sock.sendall(chunk)
-        print(f'\rProgress: {int(i/len(data)*100)}%', end='')
-        i += msg_size
+    sended = 0
+    file_size = len(data)
+    while len(data) > 0:
+        sent = sock.send(data)
+        sended += sent
+        data = data[sent:]
+        print(f'\rProgress: {int(sended/file_size*100)}%', end='')
     print(f'\rProgress: 100%')
 
 if __name__ == "__main__":
