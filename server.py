@@ -1,3 +1,5 @@
+import os
+import re
 import socket
 from threading import Thread
 
@@ -11,7 +13,7 @@ class ClientListener(Thread):
         self.sock.close()
 
     def run(self):
-        filename = self.sock.recv(1024)
+        filename = self.sock.recv(1024).decode()
         self.sock.sendall(b'ok')
 
         data = b''
@@ -23,7 +25,17 @@ class ClientListener(Thread):
                 self._close()
                 break
         
-        with open('copy_'+filename.decode(), 'wb') as f:
+        if os.path.exists(filename):
+            name, extension = filename.split('.')
+            name += '_copy'
+            copies = list(filter(lambda f: re.search(name, f), os.listdir('.')))
+            if len(copies) != 0:
+                print(list(map(lambda f: int(re.search('_copy(.+?).', f).group(1)), copies)))
+                max_copy = max([1, 1])
+                name += str(max_copy+1)
+
+            filename = name + '.' + extension
+        with open(filename, 'wb') as f:
             f.write(data)
 
 
